@@ -11,21 +11,40 @@
     <form action="/edit_teachers.html" method="post">
         {% csrf_token %}
         <input type="text" name="tch_id" class="hide" value="{{ teacher.id }}">
-        <p>教师姓名:</p>
+        <div>
+            <p>教师姓名:</p>
         <input type="text" name="tch_name" value="{{ teacher.name }}">
-        <p>选择班级:</p>
-        <select name="cls_id" multiple>
-            {% for cls in cls_list %}
-                {% if cls.id in id_list %}
-                    <option selected value="{{ cls.id }}">{{ cls.caption }}</option>
-                {% else %}
+        </div>
+        <div style="float: left">
+            <p>已选择班级:</p>
+            <select id="sel" name="cls_id" multiple>
+                {% for cls in cls_list %}
+                    <option value="{{ cls.0 }}">{{ cls.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="float: left">
+            <ul style="padding: 20px 20px">
+                <li style="list-style: none"><input type="button" id="right_move" value=">>>"></li>
+                <li style="list-style: none"><br/></li>
+                <li style="list-style: none"><input type="button" id="left_move" value="<<<"></li>
+            </ul>
+        </div>
+
+        <div style="float: left">
+            <p>未选择班级:</p>
+            <select id="none" multiple>
+                {% for cls in no_cls_list %}
                     <option value="{{ cls.id }}">{{ cls.caption }}</option>
-                {% endif %}
-            {% endfor %}
-        </select>
-        <br/>
-        <input type="submit" value="提交">
-        <span style="color: red;">{{ msg }}</span>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="clear: both">
+            <br/>
+            <input type="submit" id="submit_form" value="提交">
+            <span style="color: red;">{{ msg }}</span>
+        </div>
     </form>
 
 {% endblock %}
@@ -34,7 +53,33 @@
 {% block js %}
     <script>
         $(function(){
-            $('#menu_classes').addClass('active');
+            $('#menu_teachers').addClass('active');
+            bindRightMoveEvent();
+            bindLeftMoveEvent();
+            bindSubmitForm();
         });
+        function bindSubmitForm() {
+            $('#submit_form').click(function () {
+                $('#sel').children().each(function () {
+                    $(this).prop('selected', true)
+                })
+            })
+        }
+        function bindRightMoveEvent() {
+            $('#right_move').click(function () {
+                var options = $('#sel')[0].selectedOptions;
+                while (options.length>0) {
+                    $(options[0]).appendTo('#none');
+                }
+            })
+        }
+        function bindLeftMoveEvent() {
+            $('#left_move').click(function () {
+                var options = $('#none')[0].selectedOptions;
+                while (options.length>0) {
+                    $(options[0]).appendTo('#sel');
+                }
+            })
+        }
     </script>
 {% endblock %}

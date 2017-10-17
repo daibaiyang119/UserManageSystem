@@ -180,7 +180,9 @@ def handle_students(request):
         # 当前页数据
         stu_list = Students.objects.all()[page.page_start: page.page_end]
 
-        return render(request, 'students.html', {'username': current_user, "students": stu_list, "page_index": html_str})
+        return render(request, 'students.html', {'username': current_user,
+                                                 "students": stu_list,
+                                                 "page_index": html_str})
     else:
         return redirect("/index.html")
 
@@ -259,10 +261,11 @@ def handle_teachers(request):
     teacher_dic = {}
     for teacher in teachers:
         if teacher["id"] in teacher_dic:
-            teacher_dic[teacher["id"]]["cls_list"].append({"id": teacher["cls__id"], "caption": teacher["cls__caption"]})
+            teacher_dic[teacher["id"]]["cls_list"].append({"id": teacher["cls__id"],
+                                                           "caption": teacher["cls__caption"]})
         else:
             if teacher["cls__id"]:
-                temp = [{"id": teacher["cls__id"], "caption": teacher["cls__caption"]},]
+                temp = [{"id": teacher["cls__id"], "caption": teacher["cls__caption"]}, ]
             else:
                 temp = []
             teacher_dic[teacher["id"]] = {
@@ -270,7 +273,9 @@ def handle_teachers(request):
                 "name": teacher["name"],
                 "cls_list": temp,
             }
-    return render(request, 'teachers.html', {'username': current_user, "teacher_dic": teacher_dic, "page_index": html_str})
+    return render(request, 'teachers.html', {'username': current_user,
+                                             "teacher_dic": teacher_dic,
+                                             "page_index": html_str})
 
 
 # 通过独立页面方式添加教师
@@ -299,11 +304,13 @@ def handle_edit_teachers(request):
     if request.method == "GET":
         tch_id = request.GET.get("tch_id", None)
         teacher = Teacher.objects.get(id=tch_id)
-        cls_list = Classes.objects.all()
+        # 获取当前教师任课的班级
+        tch_cls_list = teacher.cls.all().values_list("id", "caption")
         # 获取当前教师任课的班级ID列表
-        tch_cls_list = teacher.cls.all().values_list("id")
-        id_list = list(zip(*tch_cls_list))[0]
-        return render(request, "edit_teachers.html", {"teacher": teacher, "cls_list": cls_list, "id_list": id_list})
+        id_list = list(zip(*tch_cls_list))[0] if tch_cls_list else []
+        # 获取当前教师未任课的班级
+        no_cls_list = Classes.objects.exclude(id__in=id_list)
+        return render(request, "edit_teachers.html", {"teacher": teacher, "cls_list": tch_cls_list, "no_cls_list": no_cls_list})
     elif request.method == "POST":
         tch_id = request.POST.get("tch_id", None)
         tch_name = request.POST.get("tch_name", None)
@@ -313,7 +320,8 @@ def handle_edit_teachers(request):
             teacher = Teacher.objects.get(id=tch_id)
             teacher.name = tch_name
             teacher.save()
-            teacher.cls.add(*cls_list)
+            teacher.cls.set(cls_list)
+            return redirect("/teachers.html")
         else:
             message = "内容不能为空"
             teacher = Teacher.objects.get(id=tch_id)
@@ -321,7 +329,10 @@ def handle_edit_teachers(request):
             id_list = []
             for cls_id in cls_list:
                 id_list.append(int(cls_id))
-            return render(request, "edit_teachers.html", {"teacher": teacher, "cls_list": cls, "id_list": id_list, "msg": message})
+            return render(request, "edit_teachers.html", {"teacher": teacher,
+                                                          "cls_list": cls,
+                                                          "id_list": id_list,
+                                                          "msg": message})
     else:
         return redirect("/index.html")
 
