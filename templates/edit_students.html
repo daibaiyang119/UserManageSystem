@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>编辑学生信息</h1>
+    <a href="/students.html">返回上一级</a>
+    <form action="/edit_students.html" method="post">
+        {% csrf_token %}
+        <input type="text" name="stu_id" class="hide" value="{{ student.id }}">
+        <input type="text" name="stu_name" value="{{ student.name }}">
+        <input type="text" name="stu_email" value="{{ student.email }}">
+        <select name="cls_id">
+            {% for cls in cls_list %}
+                {% if cls.id == student.cls_id %}
+                    <option selected value="{{ cls.id }}">{{ cls.caption }}</option>
+                {% else %}
+                    <option value="{{ cls.id }}">{{ cls.caption }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <input type="submit" value="提交">
+        <span style="color: red;">{{ msg }}</span>
+    </form>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function(){
+            $('#menu_classes').addClass('active');
+        });
+    </script>
+{% endblock %}

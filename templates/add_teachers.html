@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>添加教师</h1>
+    <a href="/teachers.html">返回上一级</a>
+    <br/><br/>
+    <form action="/add_teachers.html" method="post">
+        {% csrf_token %}
+        <p>教师姓名:</p>
+        <input type="text" name="tch_name" placeholder="教师姓名">
+        <p>选择班级:</p>
+        <select name="cls_id" multiple>
+            {% for cls in cls_list %}
+                <option value="{{ cls.id }}">{{ cls.caption }}</option>
+            {% endfor %}
+        </select>
+        <br/>
+        <input type="submit" value="提交">
+        <span style="color: red;">{{ msg }}</span>
+    </form>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function(){
+            $('#menu_classes').addClass('active');
+        });
+    </script>
+{% endblock %}

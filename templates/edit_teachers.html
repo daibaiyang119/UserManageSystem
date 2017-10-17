@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>编辑老师信息</h1>
+    <a href="/teachers.html">返回上一级</a>
+    <form action="/edit_teachers.html" method="post">
+        {% csrf_token %}
+        <input type="text" name="tch_id" class="hide" value="{{ teacher.id }}">
+        <p>教师姓名:</p>
+        <input type="text" name="tch_name" value="{{ teacher.name }}">
+        <p>选择班级:</p>
+        <select name="cls_id" multiple>
+            {% for cls in cls_list %}
+                {% if cls.id in id_list %}
+                    <option selected value="{{ cls.id }}">{{ cls.caption }}</option>
+                {% else %}
+                    <option value="{{ cls.id }}">{{ cls.caption }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <br/>
+        <input type="submit" value="提交">
+        <span style="color: red;">{{ msg }}</span>
+    </form>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function(){
+            $('#menu_classes').addClass('active');
+        });
+    </script>
+{% endblock %}

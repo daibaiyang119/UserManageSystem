@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>班级列表</h1>
+    <div>
+        <input id="id_add" type="button" value="添加"/>
+        <a href="/add_classes.html">添加</a>
+    </div>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Option</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cls_list %}
+                <tr>
+                    <td td_id="id">{{ item.id }}</td>
+                    <td td_id="caption">{{ item.caption }}</td>
+                    <td><a class="td-edit">编辑</a>|<a href="/edit_classes.html?cid={{ item.id }}">跳转编辑</a>|<a class="td-delete">删除</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="page_index">
+        {{ page_index|safe }}
+    </div>
+
+
+    <div class="modal hide">
+        <form action="/classes.html" method="post">
+            {% csrf_token %}
+            <input  name="id" type="text" class="hide"/>
+            <input  name="caption" type="text" placeholder="Name"/>
+            <input type="submit" value="Submit确定"/>
+            <input id="modal_ajax_submit" type="button" value="Ajax确定"/>
+            <input id="id_modal_cancel" type="button" value="取消"/>
+        </form>
+    </div>
+
+    <div class="shade hide"></div>
+
+    <div class="remove hide">
+        <input type="text" name="id" style="display: none;">
+        <input type="button" id="remove_ajax_submit" value="确定"/>
+        <input id="id_remove_cancel" type="button" value="取消"/>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+<script>
+        $(function(){
+            $('#menu_classes').addClass('active');
+            bindAddEvent();
+            bindCancelEvent();
+            bindTdDeleteEvent();
+            bindSubmitModel();
+            bindEditEvent();
+            bindSubmitRemove();
+        });
+        var SUBMIT_URL = null;
+        function bindAddEvent() {
+            $('#id_add').click(function(){
+                $('.modal,.shade').removeClass('hide');
+                SUBMIT_URL = "/classes.html";
+            })
+        };
+        function bindEditEvent() {
+            $('tbody').on('click', '.td-edit', function () {
+                $('.modal,.shade').removeClass('hide');
+                SUBMIT_URL = "/up_classes.html";
+                $(this).parent().prevAll().each(function () {
+                    var text = $(this).text();
+                    var name = $(this).attr("td_id");
+                    $('.modal input[name="'+name+'"]').val(text);
+                })
+            });
+        }
+        function bindCancelEvent() {
+            $('#id_modal_cancel, #id_remove_cancel').click(function(){
+                $('.modal,.shade, .remove').addClass('hide');
+            })
+        };
+        function bindTdDeleteEvent() {
+            // 委托绑定事件
+            $('tbody').on('click', '.td-delete', function () {
+                $('.remove,.shade').removeClass('hide');
+                SUBMIT_URL = "/del_classes.html";
+                $(this).parent().prevAll().each(function () {
+                    var text = $(this).text();
+                    var name = $(this).attr("td_id");
+                    $('.remove input[name="'+name+'"]').val(text);
+                })
+            });
+
+        };
+        function bindSubmitRemove() {
+            $('#remove_ajax_submit').click(function () {
+                var cid = $('.remove input[name="id"]').val();
+                $.ajax({
+                    url: SUBMIT_URL,
+                    type: "POST",
+                    data: {id: cid},
+                    dataType: "JSON",
+                    success: function(rep){
+                        // 刷新页面方式
+                        if(!rep.status){
+                            alert(rep.error);
+                        } else {
+                            location.reload();
+                        }
+                    }
+
+                })
+            })
+        }
+        function bindSubmitModel() {
+            $('#modal_ajax_submit').click(function () {
+                var cid = $('.modal input[name="id"]').val();
+                var value = $('.modal input[name="caption"]').val();
+                $.ajax({
+                    url: SUBMIT_URL,
+                    type: "POST",
+                    data: {caption: value, id: cid},
+                    dataType: "JSON",
+                    success: function(rep){
+                        // 刷新页面方式
+                        if(!rep.status){
+                            alert(rep.error);
+                        } else {
+                            location.reload();
+                        }
+                    }
+                })
+            })
+        }
+    </script>
+{% endblock %}

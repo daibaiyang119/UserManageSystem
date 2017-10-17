@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>教师列表</h1>
+    <a href="/add_teachers.html">添加教师</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>教师ID</th>
+                <th>教师姓名</th>
+                <th>任课班级</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for teacher in teacher_dic.values %}
+                <tr>
+                    <td td_id="id">{{ teacher.tid }}</td>
+                    <td>{{ teacher.name }}</td>
+                    <td>
+                        {% for cls in teacher.cls_list %}
+                            <span>{{ cls.caption }}</span>
+                        {% endfor %}
+                    </td>
+                    <td><a href="/edit_teachers.html?tch_id={{ teacher.tid }}">编辑</a> | <a class="td-delete">删除</a></td>
+                </tr>
+            {% endfor %}
+
+{#            这种方法频繁访问数据库不可取#}
+{#            {% for teacher in teachers %}#}
+{#                <tr>#}
+{#                    <td>{{ teacher.id }}</td>#}
+{#                    <td>{{ teacher.name }}</td>#}
+{#                    <td>#}
+{#                        {% for cls in teacher.cls.all %}#}
+{#                            <sapn>{{ cls.caption }} | </sapn>#}
+{#                        {% endfor %}#}
+{#                    </td>#}
+{#                    <td><a href="">编辑</a> | <a>删除</a></td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+
+        </tbody>
+    </table>
+    <div class="shade hide"></div>
+
+    <div class="remove hide">
+        <input type="text" name="id" style="display: none;">
+        <input type="button" id="remove_ajax_submit" value="确定"/>
+        <input id="id_remove_cancel" type="button" value="取消"/>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function(){
+            $('#menu_teachers').addClass('active');
+            bindTdDeleteEvent();
+            bindSubmitRemove();
+            bindCancelEvent();
+        });
+        function bindTdDeleteEvent() {
+            // 委托绑定事件
+            $('tbody').on('click', '.td-delete', function () {
+                $('.remove,.shade').removeClass('hide');
+                $(this).parent().prevAll().each(function () {
+                    var text = $(this).text();
+                    var name = $(this).attr("td_id");
+                    $('.remove input[name="'+name+'"]').val(text);
+                })
+            });
+
+        };
+        function bindSubmitRemove() {
+            $('#remove_ajax_submit').click(function () {
+                var cid = $('.remove input[name="id"]').val();
+                $.ajax({
+                    url: "/del_teachers.html",
+                    type: "POST",
+                    data: {id: cid},
+                    dataType: "JSON",
+                    success: function(rep){
+                        // 刷新页面方式
+                        if(!rep.status){
+                            alert(rep.error);
+                        } else {
+                            location.reload();
+                        }
+                    }
+
+                })
+            })
+        };
+
+        function bindCancelEvent() {
+            $('#id_remove_cancel').click(function () {
+                $('.remove, .shade').addClass('hide');
+            })
+        };
+    </script>
+{% endblock %}

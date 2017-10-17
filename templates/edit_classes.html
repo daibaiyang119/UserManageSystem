@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>编辑班级</h1>
+    <a href="/classes.html">返回上一级</a>
+    <form action="/edit_classes.html" method="post">
+        {% csrf_token %}
+        <input type="text" name="cid" class="hide" value="{{ obj.id }}">
+        <input type="text" name="caption" value="{{ obj.caption }}">
+        <input type="submit" value="提交">
+        <span style="color: red;">{{ msg }}</span>
+    </form>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function(){
+            $('#menu_classes').addClass('active');
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{
+            margin: 0px;
+        }
+        .hide{
+            display: none;
+        }
+        .page-header{
+            height: 30px;
+            background-color: darkgreen;
+            font-size: 16px;
+            color: white;
+        }
+        .page-header a{
+            color: white;
+            text-decoration: none;
+        }
+        .left-menu{
+            position: absolute;
+            left: 0px;
+            top: 40px;
+            bottom: 0px;
+            width: 200px;
+            background-color: cornflowerblue;
+        }
+        .left-menu a{
+            display: block;
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            height: 30px;
+            line-height: 30px;
+            border-bottom: 1px solid white;
+            text-indent: 16px;
+        }
+        .left-menu a:hover{
+            background-color: brown;
+        }
+        .left-menu .item.active{
+            background-color: brown;
+        }
+        .right-context{
+            position: absolute;
+            padding-left: 20px;
+            left: 200px;
+            top: 40px;
+            right: 0px;
+            bottom: 0px;
+            overflow: auto;
+        }
+        .modal{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 400px;
+            margin-top: -250px;
+            margin-left: -250px;
+            z-index: 100;
+            background-color: white;
+        }
+        .remove{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 200px;
+            margin-top: -100px;
+            margin-left: -200px;
+            z-index: 100;
+            background-color: red;
+        }
+        .shade{
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: black;
+            opacity: 0.5;
+            z-index: 99;
+        }
+        h1,h2,h3,h4,h5,h6{
+            margin: 0px;
+        }
+        .page_index a{
+            display: inline;
+            margin: 0 5px;
+        }
+    </style>
+    {% block css %}{% endblock %}
+</head>
+<body>
+    <div class="page-header">
+        <div style="float: right"><a href="/logout.html">注销</a><span>&nbsp;&nbsp;</span></div>
+        <div style="float: right;">用户名：{{ username }}<span>&nbsp;|&nbsp;</span></div>
+    </div>
+    <div class="left-menu">
+        <a id="menu_classes" class="item" href="/classes.html">班级管理</a>
+        <a id="menu_teachers" class="item" href="/teachers.html">老师管理</a>
+        <a id="menu_students" class="item" href="/students.html">学生管理</a>
+    </div>
+    <div class="right-context">
+        {% block context %}{% endblock %}
+    </div>
+
+    <script src="/static/jquery-1.12.4.min.js"></script>
+
+    {% block js %}{% endblock %}
+</body>
+</html>

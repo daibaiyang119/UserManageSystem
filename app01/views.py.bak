@@ -1,0 +1,101 @@
+from django.shortcuts import render, redirect, HttpResponse
+from login_app import models
+from django import views
+from django.utils.decorators import method_decorator
+
+
+def outer(func):
+    def inner(request, *args, **kwargs):
+        print(request.method)
+        return func(request, *args, **kwargs)
+    return inner
+
+
+class Login(views.View):
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     # if request.method == "GET":
+    #     #     return HttpResponse("gun")
+    #     print("11111111")
+    #     ret = super(Login, self).dispatch(request, *args, **kwargs)
+    #     print("22222222")
+    #     return ret
+
+    # @method_decorator(outer)
+    def get(self, req, *args, **kwargs):
+        print("GET")
+        return render(req, "login.html", {"msg": ""})
+
+    # @method_decorator(outer)
+    def post(self, req, *args, **kwargs):
+        print("POST")
+        user = req.POST.get("username")
+        pwd = req.POST.get("password")
+        result = models.Administrator.objects.filter(username=user, password=pwd)
+        if result:
+            rep = redirect("index.html")
+            rep.set_cookie('username', user, max_age=10)  # 设置超时时间10秒
+            return rep
+        else:
+            message = "用户名或密码错误!"
+            return render(req, "login.html", {"msg": message})
+    
+
+"""
+def login(req):
+    message = ""
+
+    # models.Administrator.objects.create(username="daiby", password="daiby")
+
+    if req.method == "POST":
+        user = req.POST.get("username")
+        pwd = req.POST.get("password")
+        result = models.Administrator.objects.filter(username=user, password=pwd)
+        if result:
+            rep = redirect("index.html")
+            rep.set_cookie('username', user, max_age=10)  # 设置超时时间10秒
+            return rep
+        else:
+            message = "用户名或密码错误!"
+
+    return render(req, "login.html", {"msg": message})
+
+
+def index(req):
+    # 如果用户已经登录，获取当前登录的用户名
+    # 否则，返回登录页面
+    username = req.COOKIES.get("username")
+    if username:
+        return render(req, "index.html", {"username": username})
+    else:
+        return redirect("login.html")
+"""
+
+
+def auth(func):
+    def inner(request, *args, **kwargs):
+        is_login = request.session.get('is_login')
+        if is_login:
+            return func(request, *args, **kwargs)
+        else:
+            return redirect('/login.html')
+
+    return inner
+
+
+@auth
+def index(request):
+    current_user = request.session.get('username')
+    return render(request, 'index.html', {'username': current_user})
+
+
+# 默认path:/ ，同一个域名下设置的cookie，其他URL可以获取
+def test1(req):
+    obj = HttpResponse("OK")
+    obj.set_cookie("k1", "k1")
+    return obj
+
+
+def test2(req):
+    result = req.COOKIES.get("k1")
+    return HttpResponse(result)

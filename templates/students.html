@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block context %}
+    <h1>学生列表</h1>
+    <a href="/add_students.html">添加学生信息</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>学生ID</th>
+                <th>学生姓名</th>
+                <th>学生邮箱</th>
+                <th>班级ID</th>
+                <th>班级名称</th>
+                <th>选项</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                <tr>
+                    <td td_id="id">{{ student.id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.cls.id }}</td>
+                    <td>{{ student.cls.caption }}</td>
+                    <td><a href="/edit_students.html?stu_id={{ student.id }}">编辑</a> | <a class="td-delete">删除</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="page_index">
+        {{ page_index|safe }}
+    </div>
+
+    <div class="shade hide"></div>
+
+    <div class="remove hide">
+        <input type="text" name="id" style="display: none;">
+        <input type="button" id="remove_ajax_submit" value="确定"/>
+        <input id="id_remove_cancel" type="button" value="取消"/>
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(function(){
+            $('#menu_students').addClass('active');
+            bindTdDeleteEvent();
+            bindSubmitRemove();
+            bindCancelEvent();
+        });
+        function bindCancelEvent() {
+            $('#id_remove_cancel').click(function(){
+                $('.shade, .remove').addClass('hide');
+            })
+        };
+        function bindTdDeleteEvent() {
+            $('tbody').on('click', '.td-delete', function () {
+                $('.remove, .shade').removeClass('hide');
+                $(this).parent().prevAll().each(function () {
+                    var text = $(this).text();
+                    var name = $(this).attr('td_id');
+                    $('.remove input[name="'+name+'"]').val(text);
+                });
+            });
+        };
+        function bindSubmitRemove() {
+            $('#remove_ajax_submit').click(function () {
+                var stu_id = $('.remove input[name="id"]').val();
+                $.ajax({
+                    url: "/del_students.html",
+                    type: "POST",
+                    data: {id: stu_id},
+                    dataType: "JSON",
+                    success: function (data) {
+                        if(!data.status){
+                            alert(data.error);
+                        } else {
+                            location.reload();
+                        }
+                    }
+                })
+            })
+        };
+
+        /*
+        function bindTdDeleteEvent() {
+            // 委托绑定事件
+            $('tbody').on('click', '.td-delete', function () {
+                $('.remove,.shade').removeClass('hide');
+                $(this).parent().prevAll().each(function () {
+                    var text = $(this).text();
+                    var name = $(this).attr("td_id");
+                    $('.remove input[name="'+name+'"]').val(text);
+                })
+            });
+
+        };
+        function bindSubmitRemove() {
+            $('#remove_ajax_submit').click(function () {
+                var stu_id = $('.remove input[name="id"]').val();
+                $.ajax({
+                    url: "/del_students.html",
+                    type: "POST",
+                    data: {id: stu_id},
+                    dataType: "JSON",
+                    success: function(rep){
+                        // 页面刷新
+                        if(!rep.status){
+                            alert(rep.error);
+                        } else {
+                            location.reload();
+                        }
+                    }
+
+                })
+            })
+        }
+        */
+    </script>
+{% endblock %}
