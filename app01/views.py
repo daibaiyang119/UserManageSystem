@@ -83,6 +83,14 @@ def handle_classes(request):
             response_dict["error"] = "标题不能为空"
         return HttpResponse(json.dumps(response_dict))
 
+        """
+        # Form表单处理
+        caption = request.POST.get("caption", None)
+        if caption:
+            Classes.objects.create(caption=caption)
+        return redirect("/classes.html")
+        """
+
 
 # 通过独立页面方式添加班级信息
 @auth
@@ -231,8 +239,23 @@ def handle_del_students(request):
 @auth
 def handle_teachers(request):
     current_user = request.session.get('username')
-    # 获取所有的教师ID，教师姓名，班级ID，班级名称
-    teachers = Teacher.objects.values("id", "name", "cls__id", "cls__caption")
+
+    # 获得当前页，默认为第一页
+    current_page = request.GET.get("page", 1)
+    current_page = int(current_page)
+
+    total_count = Teacher.objects.all().count()
+
+    # 创建分页对象，一页5条
+    page = PageHelper(total_count, current_page, "/teachers.html", 5)
+    # 页面索引HTML
+    html_str = page.pager_str()
+    teacher_list = Teacher.objects.all()[page.page_start: page.page_end].values_list("id")
+    # 取得当前页要显示的教师ID列表
+    teacher_list = list(zip(*teacher_list))[0]
+    # 获取当前页教师ID，教师姓名，班级ID，班级名称
+    # 因为一个教师不止教一个班级，所以要先取得当前页要显示的教师ID列表，例如一页5个教师
+    teachers = Teacher.objects.filter(id__in=teacher_list).values("id", "name", "cls__id", "cls__caption")
     teacher_dic = {}
     for teacher in teachers:
         if teacher["id"] in teacher_dic:
@@ -247,8 +270,7 @@ def handle_teachers(request):
                 "name": teacher["name"],
                 "cls_list": temp,
             }
-
-    return render(request, 'teachers.html', {'username': current_user, "teacher_dic": teacher_dic})
+    return render(request, 'teachers.html', {'username': current_user, "teacher_dic": teacher_dic, "page_index": html_str})
 
 
 # 通过独立页面方式添加教师
